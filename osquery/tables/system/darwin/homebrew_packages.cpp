@@ -37,6 +37,19 @@ const std::set<std::string> kHomebrewPrefixes = {
     "/opt/homebrew",
 };
 
+bool isSymlink(const std::string& path) {
+  fs::path p(path);
+  return fs::is_symlink(p);
+}
+
+std::string getSymlinkTarget(const std::string& path) {
+  if (!isSymlink(path)) {
+    return path;
+  }
+  fs::path p(path);
+  return fs::read_symlink(p).string();
+}
+
 std::vector<std::string> getHomebrewAppInfoPlistPaths(const std::string& root) {
   std::vector<std::string> results;
   auto status = osquery::listDirectoriesInDirectory(root, results);
@@ -53,8 +66,8 @@ std::string getHomebrewNameFromInfoPlistPath(const std::string& path) {
 }
 
 // Homebrew formulas are under a path like
-// /usr/local/Cellar/<formula>/<version>/* passing the formula path will return
-// the versions
+// /usr/local/Cellar/<formula>/<version>/* passing the formula path will
+// return the versions
 std::vector<std::string> getHomebrewVersionsFromInfoPlistPath(
     const std::string& path) {
   std::vector<std::string> results;
